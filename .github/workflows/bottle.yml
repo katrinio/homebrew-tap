@@ -38,6 +38,7 @@ jobs:
           rm -rf "$TAP_DIR"
           ln -s "$GITHUB_WORKSPACE" "$TAP_DIR"
           brew tap "$TAP_NAME"
+          brew trust "$TAP_NAME"
 
       - name: Build formula from source
         run: brew install --build-bottle "$TAP_NAME/${{ inputs.formula }}"
