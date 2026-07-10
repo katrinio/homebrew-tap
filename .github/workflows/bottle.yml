@@ -47,7 +47,7 @@ jobs:
         run: brew bottle --json --root-url "${ROOT_URL}" "$TAP_NAME/${{ inputs.formula }}"
 
       - name: Update formula bottle block
-        run: python3 script/update_bottle_block.py Formula/${{ inputs.formula }}.rb ./*.bottle.json "${ROOT_URL}"
+        run: brew bottle --merge --write --no-commit ./*.bottle.json
 
       - name: Publish bottle assets
         env:
