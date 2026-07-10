@@ -46,8 +46,16 @@ jobs:
       - name: Build bottle archive
         run: brew bottle --json --root-url "${ROOT_URL}" "$TAP_NAME/${{ inputs.formula }}"
 
+      - name: Collect bottle artifacts
+        run: |
+          mkdir -p dist
+          find . -type f \( -name "*.bottle.json" -o -name "*.bottle.tar.gz" \) ! -path "./dist/*" -exec mv {} dist/ \;
+          echo "Collected artifacts:"
+          ls -la dist
+          test -n "$(find dist -maxdepth 1 -type f -name '*.bottle.json' -print -quit)"
+
       - name: Update formula bottle block
-        run: brew bottle --merge --write --no-commit ./*.bottle.json
+        run: brew bottle --merge --write --no-commit dist/*.bottle.json
 
       - name: Publish bottle assets
         env:
@@ -55,7 +63,8 @@ jobs:
         run: |
           gh release view bottles >/dev/null 2>&1 || \
             gh release create bottles --title "Homebrew Bottles" --notes "Binary bottles for the tap formulas."
-          gh release upload bottles ./*.bottle.tar.gz ./*.bottle.json --clobber
+          find dist -maxdepth 1 -type f \( -name "*.bottle.tar.gz" -o -name "*.bottle.json" \) -print
+          gh release upload bottles dist/* --clobber
 
       - name: Commit formula update
         run: |
