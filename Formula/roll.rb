@@ -3,8 +3,8 @@ class Roll < Formula
 
   desc "Personal film roll index"
   homepage "https://github.com/katrinio/roll"
-  url "https://github.com/katrinio/roll/archive/refs/tags/v0.8.0.tar.gz"
-  sha256 "a88a697df3584116c8bfccedfca1f749f85eb1a14a54c3c115ffcddd8f1f5264"
+  url "https://github.com/katrinio/roll/archive/refs/tags/v0.8.1.tar.gz"
+  sha256 "01c166367d44167c129ccdebb2a8777510dc0b467c7a9dbfc14f06bbe4bf0932"
   license "MIT"
 
   depends_on "python@3.12"

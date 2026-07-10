@@ -28,14 +28,32 @@ def main() -> int:
 
 def _load_bottle_data(path: Path) -> dict[str, object]:
     payload = json.loads(path.read_text())
-    if isinstance(payload, list):
-        payload = payload[0]
-    if "bottle" not in payload and "formula" in payload:
-        payload = payload["formula"]
-    bottle = payload["bottle"]
-    if not isinstance(bottle, dict):
+    bottle = _find_bottle_data(payload)
+    if bottle is None:
         raise ValueError("unexpected bottle JSON format")
     return bottle
+
+
+def _find_bottle_data(value: object) -> dict[str, object] | None:
+    if isinstance(value, dict):
+        bottle = value.get("bottle")
+        if isinstance(bottle, dict) and isinstance(bottle.get("files"), dict):
+            return bottle
+        if isinstance(value.get("files"), dict):
+            return value  # already at the bottle object level
+        for nested in value.values():
+            found = _find_bottle_data(nested)
+            if found is not None:
+                return found
+        return None
+
+    if isinstance(value, list):
+        for item in value:
+            found = _find_bottle_data(item)
+            if found is not None:
+                return found
+
+    return None
 
 
 def _render_bottle_block(bottle_data: dict[str, object], root_url: str) -> str:
