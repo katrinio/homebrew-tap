@@ -17,7 +17,9 @@ jobs:
     env:
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1
+      HOMEBREW_NO_INSTALL_FROM_API: 1
       ROOT_URL: https://github.com/${{ github.repository }}/releases/download/bottles
+      TAP_NAME: ${{ github.repository_owner }}/tap
 
     steps:
       - name: Check out tap
@@ -28,11 +30,20 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
 
+      - name: Register checkout as local tap
+        run: |
+          BREW_REPO="$(brew --repository)"
+          TAP_DIR="${BREW_REPO}/Library/Taps/${{ github.repository_owner }}/homebrew-tap"
+          mkdir -p "$(dirname "$TAP_DIR")"
+          rm -rf "$TAP_DIR"
+          ln -s "$GITHUB_WORKSPACE" "$TAP_DIR"
+          brew tap "$TAP_NAME"
+
       - name: Build formula from source
-        run: brew install --build-bottle ./Formula/${{ inputs.formula }}.rb
+        run: brew install --build-bottle "$TAP_NAME/${{ inputs.formula }}"
 
       - name: Build bottle archive
-        run: brew bottle --json --root-url "${ROOT_URL}" ${{ inputs.formula }}
+        run: brew bottle --json --root-url "${ROOT_URL}" "$TAP_NAME/${{ inputs.formula }}"
 
       - name: Update formula bottle block
         run: python3 script/update_bottle_block.py Formula/${{ inputs.formula }}.rb ./*.bottle.json "${ROOT_URL}"
