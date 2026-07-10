@@ -3,8 +3,8 @@ class Roll < Formula
 
   desc "Personal film roll index"
   homepage "https://github.com/katrinio/roll"
-  url "https://github.com/katrinio/roll/archive/refs/tags/v0.7.0.tar.gz"
-  sha256 "f4248d7d7429320078aad7274238635d99cf1321fa5d6d8c259a92faca366ac3"
+  url "https://github.com/katrinio/roll/archive/refs/tags/v0.8.0.tar.gz"
+  sha256 "8fcf1f5bc57b6bbfbf400c52bd3cc77e3f71ae380c70f51ca4bd3d3c0f538ffd"
   license "MIT"
 
   depends_on "python@3.12"
@@ -20,6 +20,9 @@ class Roll < Formula
   end
 
   def install
+    # GitHub source archives do not reliably preserve enough VCS metadata for
+    # setuptools-scm, so pin the package version from the formula itself.
+    ENV["SETUPTOOLS_SCM_PRETEND_VERSION_FOR_ROLL"] = version.to_s
     virtualenv_install_with_resources
   end
 
