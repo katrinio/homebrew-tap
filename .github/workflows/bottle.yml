@@ -53,6 +53,7 @@ jobs:
           echo "Collected artifacts:"
           ls -la dist
           test -n "$(find dist -maxdepth 1 -type f -name '*.bottle.json' -print -quit)"
+          test -n "$(find dist -maxdepth 1 -type f -name '*.bottle.tar.gz' -print -quit)"
 
       - name: Update formula bottle block
         run: brew bottle --merge --write --no-commit dist/*.bottle.json

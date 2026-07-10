@@ -7,12 +7,6 @@ class Roll < Formula
   sha256 "f493b9243c3feac84ac1a31409085d78045a4f8ec48e5f3a6b220cf58d8fc85b"
   license "MIT"
 
-  bottle do
-    root_url "https://github.com/katrinio/homebrew-tap/releases/download/bottles"
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e32e5d80990c90da2b3eb3600989d78d2e99c812c1a3f972e57aaa56905380a2"
-  end
-
   depends_on "python@3.12"
 
   resource "typer" do
