@@ -1,0 +1,55 @@
+name: publish-bottle
+
+on:
+  workflow_dispatch:
+    inputs:
+      formula:
+        description: Formula name
+        required: true
+        default: roll
+
+permissions:
+  contents: write
+
+jobs:
+  bottle:
+    runs-on: macos-15
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+      ROOT_URL: https://github.com/${{ github.repository }}/releases/download/bottles
+
+    steps:
+      - name: Check out tap
+        uses: actions/checkout@v4
+
+      - name: Set up git author
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+      - name: Build formula from source
+        run: brew install --build-bottle ./Formula/${{ inputs.formula }}.rb
+
+      - name: Build bottle archive
+        run: brew bottle --json --root-url "${ROOT_URL}" ${{ inputs.formula }}
+
+      - name: Update formula bottle block
+        run: python3 script/update_bottle_block.py Formula/${{ inputs.formula }}.rb ./*.bottle.json "${ROOT_URL}"
+
+      - name: Publish bottle assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view bottles >/dev/null 2>&1 || \
+            gh release create bottles --title "Homebrew Bottles" --notes "Binary bottles for the tap formulas."
+          gh release upload bottles ./*.bottle.tar.gz ./*.bottle.json --clobber
+
+      - name: Commit formula update
+        run: |
+          if git diff --quiet -- Formula/${{ inputs.formula }}.rb; then
+            exit 0
+          fi
+          git add Formula/${{ inputs.formula }}.rb
+          git commit -m "Update ${{ inputs.formula }} bottle"
+          git push
